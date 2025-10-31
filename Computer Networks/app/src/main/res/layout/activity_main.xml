@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="24dp"
     tools:context=".MainActivity"
-    android:background="#121212">
+    android:background="@android:color/white">
 
     <TextView
         android:id="@+id/title"
@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:text="MediGuide"
         android:textSize="32sp"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/royal_blue"
+        android:textStyle="bold"
         android:layout_gravity="center"
         android:paddingBottom="24dp" />
 
@@ -23,7 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Username"
-        android:textColor="#FFFFFF"
+        android:textColor="@android:color/black"
+        android:backgroundTint="@color/royal_blue"
         android:padding="12dp"
         android:layout_marginBottom="16dp" />
 
@@ -33,7 +35,8 @@
         android:layout_height="wrap_content"
         android:hint="Password"
         android:inputType="textPassword"
-        android:textColor="#FFFFFF"
+        android:textColor="@android:color/black"
+        android:backgroundTint="@color/royal_blue"
         android:padding="12dp"
         android:layout_marginBottom="24dp" />
 
@@ -42,7 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:backgroundTint="#03DAC5"
-        android:textColor="#000000" />
+        android:backgroundTint="@color/royal_blue"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>
