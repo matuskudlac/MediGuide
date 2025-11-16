@@ -67,13 +67,14 @@
 
     </LinearLayout>
 
-    <Button
+    <ImageButton
         android:id="@+id/cart_remove_button"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Remove"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:background="?attr/selectableItemBackgroundBorderless"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/cart_quantity_selector"
         app:layout_constraintBottom_toBottomOf="@id/cart_quantity_selector"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
