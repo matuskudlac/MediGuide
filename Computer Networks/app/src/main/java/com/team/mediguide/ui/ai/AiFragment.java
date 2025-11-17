@@ -51,7 +51,7 @@ public class AiFragment extends Fragment {
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
 
-        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.MEDI_GUIDE_API_KEY);
+        GenerativeModel gm = new GenerativeModel("gemini-2.0-flash", BuildConfig.MEDI_GUIDE_API_KEY);
         generativeModel = GenerativeModelFutures.from(gm);
 
         sendButton.setOnClickListener(v -> {
