@@ -1,16 +1,17 @@
 package com.team.mediguide;
 
-import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -46,8 +47,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         int blueColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.royal_blue);
         holder.decrementButton.setTextColor(blueColor);
         holder.incrementButton.setTextColor(blueColor);
+        ImageViewCompat.setImageTintList(holder.removeButton, ContextCompat.getColorStateList(holder.itemView.getContext(), R.color.royal_blue));
 
-        // Fetch product details for name, price, image, and stock
+        // Fetch product details
         db.collection("Products").document(cartItem.productId).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 Product product = documentSnapshot.toObject(Product.class);
@@ -55,7 +57,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 holder.cartProductPrice.setText(String.format("$%.2f", product.price));
                 Glide.with(holder.itemView.getContext()).load(product.imageUrl).into(holder.cartProductImage);
 
-                // Set up button logic
                 setupCartControls(holder, cartItem, product);
             }
         });
@@ -65,21 +66,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DocumentReference itemRef = db.collection("ShoppingCarts").document(userId).collection("Items").document(cartItem.id);
 
-        // Remove Button
-        holder.removeButton.setOnClickListener(v -> {
-            itemRef.delete(); // The snapshot listener will handle the UI update
-        });
+        holder.removeButton.setOnClickListener(v -> itemRef.delete());
 
-        // Decrement Button
         holder.decrementButton.setOnClickListener(v -> {
             if (cartItem.quantity > 1) {
                 itemRef.update("Quantity", cartItem.quantity - 1);
             } else {
-                itemRef.delete(); // If quantity is 1, decrementing removes the item
+                itemRef.delete();
             }
         });
 
-        // Increment Button
         holder.incrementButton.setOnClickListener(v -> {
             if (cartItem.quantity < product.stock) {
                 itemRef.update("Quantity", cartItem.quantity + 1);
@@ -99,7 +95,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         TextView cartProductName;
         TextView cartProductPrice;
         TextView cartQuantityTextView;
-        Button decrementButton, incrementButton, removeButton;
+        Button decrementButton, incrementButton;
+        ImageButton removeButton;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);

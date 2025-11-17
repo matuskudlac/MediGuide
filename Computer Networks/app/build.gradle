@@ -13,6 +13,9 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+
+        // Read the API key from gradle.properties and make it available in the BuildConfig class
+        buildConfigField "String", "MEDI_GUIDE_API_KEY", "\"${project.properties['MEDI_GUIDE_API_KEY']}\""
     }
 
     buildTypes {
@@ -29,6 +32,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true // Enable the BuildConfig feature
     }
 }
 
@@ -46,4 +50,5 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.navigation:navigation-fragment:2.7.7")
     implementation("androidx.navigation:navigation-ui:2.7.7")
+    implementation("com.google.ai.client.generativeai:generativeai:0.8.0")
 }
