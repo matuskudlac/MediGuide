@@ -5,25 +5,39 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-// Explicit import is good, but we will be hyper-explicit below to be safe.
-// import com.team.mediguide.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> implements Filterable {
 
     private List<Product> productList;
+    private List<Product> productListFull;
 
     public ProductAdapter(List<Product> productList) {
         this.productList = productList;
+    }
+
+    public void setProductListFull(List<Product> productListFull) {
+        this.productListFull = productListFull;
     }
 
     @NonNull
@@ -37,11 +51,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
 
-        // Set product name and price
         holder.productName.setText(product.name);
         holder.productPrice.setText(String.format("$%.2f", product.price));
 
-        // Set stock status text and color
         if (product.stock > 10) {
             holder.productStock.setText("In Stock");
             holder.productStock.setTextColor(Color.GREEN);
@@ -53,20 +65,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             holder.productStock.setTextColor(Color.RED);
         }
 
-        // Load product image
         Glide.with(holder.itemView.getContext())
                 .load(product.imageUrl)
-                .placeholder(R.drawable.ic_launcher_background) // A default placeholder
-                .error(Color.LTGRAY) // A fallback color if the URL is invalid
                 .into(holder.productImage);
 
-        // Set click listener to navigate to detail page
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("productId", product.id);
-            // Using the fully qualified class name to avoid build cache issues
-            Navigation.findNavController(v).navigate(com.team.mediguide.R.id.action_navigation_home_to_productDetailFragment, bundle);
+            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_productDetailFragment, bundle);
         });
+
+        holder.addToCartButton.setOnClickListener(v -> addToCart(v, product));
     }
 
     @Override
@@ -74,11 +83,71 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
+    @Override
+    public Filter getFilter() {
+        return productFilter;
+    }
+
+    private final Filter productFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Product> filteredList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(productListFull);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (Product item : productListFull) {
+                    if (item.name.toLowerCase().contains(filterPattern)) {
+                        filteredList.add(item);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            productList.clear();
+            productList.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
+
+    private void addToCart(View view, Product product) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String userId = currentUser.getUid();
+        Query query = db.collection("ShoppingCarts").document(userId).collection("Items").whereEqualTo("productId", product.id);
+
+        query.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            if (!queryDocumentSnapshots.isEmpty()) {
+                DocumentReference itemRef = queryDocumentSnapshots.getDocuments().get(0).getReference();
+                long existingQuantity = queryDocumentSnapshots.getDocuments().get(0).getLong("quantity");
+                itemRef.update("quantity", existingQuantity + 1).addOnSuccessListener(aVoid -> {
+                    Toast.makeText(view.getContext(), "Cart updated", Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                CartItem newItem = new CartItem();
+                newItem.productId = product.id;
+                newItem.quantity = 1;
+                newItem.dateAdded = new Date();
+                db.collection("ShoppingCarts").document(userId).collection("Items").add(newItem).addOnSuccessListener(aVoid -> {
+                    Toast.makeText(view.getContext(), "Added to cart", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
     static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
         TextView productName;
         TextView productPrice;
         TextView productStock;
+        Button addToCartButton;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,6 +155,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             productName = itemView.findViewById(R.id.productName);
             productPrice = itemView.findViewById(R.id.productPrice);
             productStock = itemView.findViewById(R.id.productStock);
+            addToCartButton = itemView.findViewById(R.id.addToCartButton);
         }
     }
 }
