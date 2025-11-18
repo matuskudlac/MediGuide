@@ -1,6 +1,7 @@
 package com.team.mediguide;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,14 +10,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-// Explicit import is good, but we will be hyper-explicit below to be safe.
-// import com.team.mediguide.R;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.List;
+
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
@@ -37,14 +42,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
 
-        // Set product name and price
         holder.productName.setText(product.name);
         holder.productPrice.setText(String.format("$%.2f", product.price));
 
-        // Set stock status text and color
         if (product.stock > 10) {
             holder.productStock.setText("In Stock");
-            holder.productStock.setTextColor(Color.GREEN);
+            holder.productStock.setTextColor(Color.rgb(0, 150, 0));
         } else if (product.stock > 0) {
             holder.productStock.setText(product.stock + " left in stock");
             holder.productStock.setTextColor(Color.rgb(255, 165, 0)); // Orange
@@ -53,19 +56,36 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             holder.productStock.setTextColor(Color.RED);
         }
 
-        // Load product image
+        // Set initial visibility before loading
+        holder.productImage.setVisibility(View.VISIBLE);
+        holder.imageErrorText.setVisibility(View.GONE);
+
         Glide.with(holder.itemView.getContext())
                 .load(product.imageUrl)
-                .placeholder(R.drawable.ic_launcher_background) // A default placeholder
-                .error(Color.LTGRAY) // A fallback color if the URL is invalid
+                .placeholder(R.drawable.ic_launcher_background)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        // If the image fails to load, hide the image view and show the error text
+                        holder.productImage.setVisibility(View.GONE);
+                        holder.imageErrorText.setVisibility(View.VISIBLE);
+                        return false; // Return false so Glide can handle any error placeholder
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        // If the image loads, ensure the error text is hidden
+                        holder.productImage.setVisibility(View.VISIBLE);
+                        holder.imageErrorText.setVisibility(View.GONE);
+                        return false; // Return false to let Glide handle displaying the image
+                    }
+                })
                 .into(holder.productImage);
 
-        // Set click listener to navigate to detail page
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("productId", product.id);
-            // Using the fully qualified class name to avoid build cache issues
-            Navigation.findNavController(v).navigate(com.team.mediguide.R.id.action_navigation_home_to_productDetailFragment, bundle);
+            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_productDetailFragment, bundle);
         });
     }
 
@@ -79,6 +99,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         TextView productName;
         TextView productPrice;
         TextView productStock;
+        TextView imageErrorText; // Add a reference to the error TextView
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,6 +107,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             productName = itemView.findViewById(R.id.productName);
             productPrice = itemView.findViewById(R.id.productPrice);
             productStock = itemView.findViewById(R.id.productStock);
+            imageErrorText = itemView.findViewById(R.id.imageErrorText); // Initialize it
         }
     }
 }

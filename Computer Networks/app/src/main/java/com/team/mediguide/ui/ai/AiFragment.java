@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -83,7 +82,7 @@ public class AiFragment extends Fragment {
         chatMessages.add(new ChatMessage("...", false));
         chatAdapter.notifyItemInserted(chatMessages.size() - 1);
         chatRecyclerView.scrollToPosition(chatMessages.size() - 1);
-        
+
         // Convert the history to the required array format
         Content[] historyArray = chatHistory.toArray(new Content[0]);
 
