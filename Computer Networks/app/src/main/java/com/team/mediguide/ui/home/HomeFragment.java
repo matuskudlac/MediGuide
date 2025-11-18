@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +36,6 @@ public class HomeFragment extends Fragment {
     private FeaturedProductAdapter featuredProductAdapter;
     private List<Product> featuredProductList;
     private FirebaseFirestore db;
-    private SearchView searchView;
     private TextView welcomeMessage;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,21 +59,6 @@ public class HomeFragment extends Fragment {
         productList = new ArrayList<>();
         productAdapter = new ProductAdapter(productList);
         productsRecyclerView.setAdapter(productAdapter);
-
-        searchView = root.findViewById(R.id.search_view);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                productAdapter.getFilter().filter(query);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                productAdapter.getFilter().filter(newText);
-                return false;
-            }
-        });
 
         fetchFeaturedProducts();
         fetchProducts();
@@ -112,7 +95,6 @@ public class HomeFragment extends Fragment {
                             product.id = document.getId();
                             productList.add(product);
                         }
-                        productAdapter.setProductListFull(new ArrayList<>(productList));
                         productAdapter.notifyDataSetChanged();
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());

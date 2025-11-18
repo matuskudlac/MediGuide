@@ -6,8 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,21 +21,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> implements Filterable {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
     private List<Product> productList;
-    private List<Product> productListFull;
 
     public ProductAdapter(List<Product> productList) {
         this.productList = productList;
-    }
-
-    public void setProductListFull(List<Product> productListFull) {
-        this.productListFull = productListFull;
     }
 
     @NonNull
@@ -82,38 +74,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public int getItemCount() {
         return productList.size();
     }
-
-    @Override
-    public Filter getFilter() {
-        return productFilter;
-    }
-
-    private final Filter productFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            List<Product> filteredList = new ArrayList<>();
-            if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(productListFull);
-            } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
-                for (Product item : productListFull) {
-                    if (item.name.toLowerCase().contains(filterPattern)) {
-                        filteredList.add(item);
-                    }
-                }
-            }
-            FilterResults results = new FilterResults();
-            results.values = filteredList;
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            productList.clear();
-            productList.addAll((List) results.values);
-            notifyDataSetChanged();
-        }
-    };
 
     private void addToCart(View view, Product product) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
