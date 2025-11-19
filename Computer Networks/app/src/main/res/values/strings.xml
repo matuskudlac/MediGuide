@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">MediGuide</string>
+
+    <!-- Stock Status Strings -->
+    <string name="in_stock">In Stock</string>
+    <string name="out_of_stock">Out of Stock</string>
+    <string name="stock_left_in_stock">%d left in stock</string>
+    <string name="image_not_found">Image could not be found</string>
+
+    <!-- Cart Item Strings -->
+    <string name="cart_product_image_description">Product Image</string>
+    <string name="remove_item_button_description">Remove item from cart</string>
+    <string name="decrement_button_text">-</string>
+    <string name="increment_button_text">+</string>
+
+    <!-- Product Detail Strings -->
+    <string name="add_to_cart_button_text">Add to Cart</string>
+
 </resources>

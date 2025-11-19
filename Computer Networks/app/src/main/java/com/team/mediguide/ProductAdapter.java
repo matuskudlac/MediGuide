@@ -1,5 +1,6 @@
 package com.team.mediguide;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,12 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
+import java.util.Locale;
 
-import com.team.mediguide.R;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
-    private List<Product> productList;
+    private final List<Product> productList;
 
     public ProductAdapter(List<Product> productList) {
         this.productList = productList;
@@ -36,26 +37,26 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
+        Context context = holder.itemView.getContext();
 
         holder.productName.setText(product.name);
-        holder.productPrice.setText(String.format("$%.2f", product.price));
+        holder.productPrice.setText(String.format(Locale.US, "$%.2f", product.price));
 
         if (product.stock > 10) {
-            holder.productStock.setText("In Stock");
+            holder.productStock.setText(R.string.in_stock);
             holder.productStock.setTextColor(Color.rgb(0, 150, 0));
         } else if (product.stock > 0) {
-            holder.productStock.setText(product.stock + " left in stock");
+            holder.productStock.setText(context.getString(R.string.stock_left_in_stock, product.stock));
             holder.productStock.setTextColor(Color.rgb(255, 165, 0)); // Orange
         } else {
-            holder.productStock.setText("Out of Stock");
+            holder.productStock.setText(R.string.out_of_stock);
             holder.productStock.setTextColor(Color.RED);
         }
 
-        // Use the simple .error() method with our custom TextDrawable
-        Glide.with(holder.itemView.getContext())
+        Glide.with(context)
                 .load(product.imageUrl)
                 .placeholder(R.drawable.ic_launcher_background)
-                .error(new TextDrawable("Image could not be found"))
+                .error(new TextDrawable(context.getString(R.string.image_not_found)))
                 .into(holder.productImage);
 
         holder.itemView.setOnClickListener(v -> {
@@ -70,8 +71,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
-    // The ViewHolder is now much simpler
-    static class ProductViewHolder extends RecyclerView.ViewHolder {
+    public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
         TextView productName;
         TextView productPrice;
