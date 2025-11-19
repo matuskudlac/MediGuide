@@ -22,8 +22,8 @@
             android:id="@+id/product_image"
             android:layout_width="0dp"
             android:layout_height="250dp"
-            android:scaleType="centerCrop"
-            android:background="#EEEEEE"
+            android:scaleType="fitCenter"
+            android:background="@android:color/white"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />

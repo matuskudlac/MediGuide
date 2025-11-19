@@ -13,10 +13,10 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-// Explicit import is good, but we will be hyper-explicit below to be safe.
-// import com.team.mediguide.R;
 
 import java.util.List;
+
+import com.team.mediguide.R;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
@@ -37,14 +37,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
 
-        // Set product name and price
         holder.productName.setText(product.name);
         holder.productPrice.setText(String.format("$%.2f", product.price));
 
-        // Set stock status text and color
         if (product.stock > 10) {
             holder.productStock.setText("In Stock");
-            holder.productStock.setTextColor(Color.GREEN);
+            holder.productStock.setTextColor(Color.rgb(0, 150, 0));
         } else if (product.stock > 0) {
             holder.productStock.setText(product.stock + " left in stock");
             holder.productStock.setTextColor(Color.rgb(255, 165, 0)); // Orange
@@ -53,19 +51,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             holder.productStock.setTextColor(Color.RED);
         }
 
-        // Load product image
+        // Use the simple .error() method with our custom TextDrawable
         Glide.with(holder.itemView.getContext())
                 .load(product.imageUrl)
-                .placeholder(R.drawable.ic_launcher_background) // A default placeholder
-                .error(Color.LTGRAY) // A fallback color if the URL is invalid
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(new TextDrawable("Image could not be found"))
                 .into(holder.productImage);
 
-        // Set click listener to navigate to detail page
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("productId", product.id);
-            // Using the fully qualified class name to avoid build cache issues
-            Navigation.findNavController(v).navigate(com.team.mediguide.R.id.action_navigation_home_to_productDetailFragment, bundle);
+            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_productDetailFragment, bundle);
         });
     }
 
@@ -74,6 +70,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
+    // The ViewHolder is now much simpler
     static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
         TextView productName;
