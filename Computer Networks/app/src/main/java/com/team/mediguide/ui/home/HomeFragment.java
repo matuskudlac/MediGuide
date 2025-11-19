@@ -5,14 +5,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.team.mediguide.FeaturedProductAdapter;
 import com.team.mediguide.Product;
 import com.team.mediguide.ProductAdapter;
 import com.team.mediguide.R;
@@ -26,12 +32,27 @@ public class HomeFragment extends Fragment {
     private RecyclerView productsRecyclerView;
     private ProductAdapter productAdapter;
     private List<Product> productList;
+    private ViewPager2 featuredProductsViewPager;
+    private FeaturedProductAdapter featuredProductAdapter;
+    private List<Product> featuredProductList;
     private FirebaseFirestore db;
+    private TextView welcomeMessage;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
         db = FirebaseFirestore.getInstance();
+
+        welcomeMessage = root.findViewById(R.id.welcome_message);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty()) {
+            welcomeMessage.setText("Welcome, " + user.getDisplayName() + "!");
+        }
+
+        featuredProductsViewPager = root.findViewById(R.id.featured_products_viewpager);
+        featuredProductList = new ArrayList<>();
+        featuredProductAdapter = new FeaturedProductAdapter(featuredProductList);
+        featuredProductsViewPager.setAdapter(featuredProductAdapter);
 
         productsRecyclerView = root.findViewById(R.id.productsRecyclerView);
         productsRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
@@ -39,9 +60,28 @@ public class HomeFragment extends Fragment {
         productAdapter = new ProductAdapter(productList);
         productsRecyclerView.setAdapter(productAdapter);
 
+        fetchFeaturedProducts();
         fetchProducts();
 
         return root;
+    }
+
+    private void fetchFeaturedProducts() {
+        db.collection("Products").whereEqualTo("isFeatured", true).limit(5)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        featuredProductList.clear();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Product product = document.toObject(Product.class);
+                            product.id = document.getId();
+                            featuredProductList.add(product);
+                        }
+                        featuredProductAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.w(TAG, "Error getting featured documents.", task.getException());
+                    }
+                });
     }
 
     private void fetchProducts() {
@@ -49,20 +89,13 @@ public class HomeFragment extends Fragment {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Log.d(TAG, "Task successful");
                         productList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            try {
-                                Product product = document.toObject(Product.class);
-                                product.id = document.getId(); // Capture the document ID
-                                productList.add(product);
-                                Log.d(TAG, "Product added: " + product.name);
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error converting document to Product", e);
-                            }
+                            Product product = document.toObject(Product.class);
+                            product.id = document.getId();
+                            productList.add(product);
                         }
                         productAdapter.notifyDataSetChanged();
-                        Log.d(TAG, "Product list size: " + productList.size());
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
                     }

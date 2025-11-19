@@ -1,50 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:background="@android:color/white">
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp">
 
-        <ImageView
-            android:id="@+id/productImage"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitCenter" />
+        <!-- This is your FrameLayout, merged into their design -->
+        <FrameLayout
+            android:id="@+id/imageContainer"
+            android:layout_width="0dp"
+            android:layout_height="180dp"
+            android:background="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/productImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/imageErrorText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Image not found"
+                android:textColor="@android:color/darker_gray"
+                android:visibility="gone" />
+
+        </FrameLayout>
 
         <TextView
-            android:id="@+id/imageErrorText"
+            android:id="@+id/productName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageContainer" />
+
+        <TextView
+            android:id="@+id/productPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Image not found"
-            android:textColor="@android:color/darker_gray"
-            android:visibility="gone" />
+            android:layout_marginTop="4dp"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/productName"
+            app:layout_constraintTop_toBottomOf="@+id/productName" />
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/productStock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="@+id/productPrice"
+            app:layout_constraintTop_toBottomOf="@+id/productPrice" />
 
-    <TextView
-        android:id="@+id/productName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        <Button
+            android:id="@+id/addToCartButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="Add to Cart"
+            android:textColor="@color/royal_blue"
+            app:layout_constraintBottom_toBottomOf="@+id/productStock"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/productPrice" />
 
-    <TextView
-        android:id="@+id/productPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/productStock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textStyle="italic" />
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>
