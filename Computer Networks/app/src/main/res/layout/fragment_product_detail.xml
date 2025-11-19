@@ -65,6 +65,36 @@
                 android:textSize="22sp"
                 android:textColor="@color/royal_blue"
                 android:layout_marginTop="8dp" />
+            
+            <LinearLayout
+                android:id="@+id/quantity_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <Button
+                    android:id="@+id/decrement_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="-" />
+
+                <TextView
+                    android:id="@+id/quantity_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1"
+                    android:textSize="20sp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+
+                <Button
+                    android:id="@+id/increment_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="+" />
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -123,7 +153,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_add_shopping_cart"
+        android:src="@android:drawable/ic_input_add"
+        app:tint="@android:color/white"
+        app:backgroundTint="@color/royal_blue"
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end" />
 
