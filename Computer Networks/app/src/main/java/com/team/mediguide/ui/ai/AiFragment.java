@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -90,7 +88,6 @@ public class AiFragment extends Fragment {
         chatAdapter.notifyItemInserted(chatMessages.size() - 1);
         chatRecyclerView.scrollToPosition(chatMessages.size() - 1);
 
-        // Convert the history to the required array format
         Content[] historyArray = chatHistory.toArray(new Content[0]);
 
         ListenableFuture<GenerateContentResponse> response = generativeModel.generateContent(historyArray);

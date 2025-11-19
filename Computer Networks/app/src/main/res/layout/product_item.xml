@@ -4,40 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp">
+        android:layout_height="wrap_content">
 
-        <!-- This is your FrameLayout, merged into their design -->
-        <FrameLayout
-            android:id="@+id/imageContainer"
+        <ImageView
+            android:id="@+id/productImage"
             android:layout_width="0dp"
             android:layout_height="180dp"
-            android:background="@android:color/white"
+            android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/productImage"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="fitCenter" />
-
-            <TextView
-                android:id="@+id/imageErrorText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Image not found"
-                android:textColor="@android:color/darker_gray"
-                android:visibility="gone" />
-
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/productName"
@@ -50,7 +31,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageContainer" />
+            app:layout_constraintTop_toBottomOf="@+id/productImage" />
 
         <TextView
             android:id="@+id/productPrice"
