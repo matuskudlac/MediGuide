@@ -9,7 +9,9 @@
         android:id="@+id/cart_product_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
+        android:background="@android:color/white"
+        android:contentDescription="@string/cart_product_image_description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,13 +49,13 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:text="-" />
+            android:text="@string/decrement_button_text" />
 
         <TextView
             android:id="@+id/cart_quantity_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1"
+            android:text=""
             android:textSize="16sp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp" />
@@ -63,7 +65,7 @@
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:text="+" />
+            android:text="@string/increment_button_text" />
 
     </LinearLayout>
 
@@ -73,6 +75,7 @@
         android:layout_height="wrap_content"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/remove_item_button_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/cart_quantity_selector"
         app:layout_constraintBottom_toBottomOf="@id/cart_quantity_selector"/>

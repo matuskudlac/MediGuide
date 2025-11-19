@@ -22,8 +22,9 @@
             android:id="@+id/product_image"
             android:layout_width="0dp"
             android:layout_height="250dp"
-            android:scaleType="centerCrop"
-            android:background="#EEEEEE"
+            android:scaleType="fitCenter"
+            android:background="@android:color/white"
+            android:contentDescription="@string/cart_product_image_description"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -110,13 +111,13 @@
                 android:id="@+id/decrement_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:text="-" />
+                android:text="@string/decrement_button_text" />
 
             <TextView
                 android:id="@+id/quantity_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1"
+                android:text=""
                 android:textSize="20sp"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp" />
@@ -125,7 +126,7 @@
                 android:id="@+id/increment_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:text="+" />
+                android:text="@string/increment_button_text" />
 
         </LinearLayout>
 
@@ -134,8 +135,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:text="Add to Cart"
-            app:layout_constraintTop_toBottomOf="@+id/quantity_selector"
+            android:text="@string/add_to_cart_button_text"
+            app:layout_constraintTop_toBottomOf="@id/quantity_selector"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

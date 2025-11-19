@@ -1,5 +1,6 @@
 package com.team.mediguide;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,14 +14,14 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-// Explicit import is good, but we will be hyper-explicit below to be safe.
-// import com.team.mediguide.R;
 
 import java.util.List;
+import java.util.Locale;
+
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
-    private List<Product> productList;
+    private final List<Product> productList;
 
     public ProductAdapter(List<Product> productList) {
         this.productList = productList;
@@ -36,36 +37,32 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
+        Context context = holder.itemView.getContext();
 
-        // Set product name and price
         holder.productName.setText(product.name);
-        holder.productPrice.setText(String.format("$%.2f", product.price));
+        holder.productPrice.setText(String.format(Locale.US, "$%.2f", product.price));
 
-        // Set stock status text and color
         if (product.stock > 10) {
-            holder.productStock.setText("In Stock");
-            holder.productStock.setTextColor(Color.GREEN);
+            holder.productStock.setText(R.string.in_stock);
+            holder.productStock.setTextColor(Color.rgb(0, 150, 0));
         } else if (product.stock > 0) {
-            holder.productStock.setText(product.stock + " left in stock");
+            holder.productStock.setText(context.getString(R.string.stock_left_in_stock, product.stock));
             holder.productStock.setTextColor(Color.rgb(255, 165, 0)); // Orange
         } else {
-            holder.productStock.setText("Out of Stock");
+            holder.productStock.setText(R.string.out_of_stock);
             holder.productStock.setTextColor(Color.RED);
         }
 
-        // Load product image
-        Glide.with(holder.itemView.getContext())
+        Glide.with(context)
                 .load(product.imageUrl)
-                .placeholder(R.drawable.ic_launcher_background) // A default placeholder
-                .error(Color.LTGRAY) // A fallback color if the URL is invalid
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(new TextDrawable(context.getString(R.string.image_not_found)))
                 .into(holder.productImage);
 
-        // Set click listener to navigate to detail page
         holder.itemView.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("productId", product.id);
-            // Using the fully qualified class name to avoid build cache issues
-            Navigation.findNavController(v).navigate(com.team.mediguide.R.id.action_navigation_home_to_productDetailFragment, bundle);
+            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_productDetailFragment, bundle);
         });
     }
 
@@ -74,7 +71,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
-    static class ProductViewHolder extends RecyclerView.ViewHolder {
+    public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
         TextView productName;
         TextView productPrice;
