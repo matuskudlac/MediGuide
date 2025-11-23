@@ -49,6 +49,7 @@ public class AiFragment extends Fragment {
     private List<Content> chatHistory; // Reference to ViewModel's list
     private EditText chatInput;
     private Button sendButton;
+    private android.widget.TextView newChatText;  // New Chat text link
     private GenerativeModelFutures generativeModel;
     private FirebaseFirestore db;              // Firestore database instance
     private List<Product> cartProducts;        // Products currently in user's cart
@@ -67,6 +68,7 @@ public class AiFragment extends Fragment {
         chatRecyclerView = root.findViewById(R.id.chat_recyclerview);
         chatInput = root.findViewById(R.id.chat_input);
         sendButton = root.findViewById(R.id.send_button);
+        newChatText = root.findViewById(R.id.new_chat_text);
 
         chatAdapter = new ChatMessageAdapter(chatMessages);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -83,6 +85,8 @@ public class AiFragment extends Fragment {
                 sendMessage(messageText);
             }
         });
+
+        newChatText.setOnClickListener(v -> resetConversation());
 
         // Only load cart context if this is the first time (history is empty)
         if (chatHistory.isEmpty()) {
@@ -444,6 +448,29 @@ public class AiFragment extends Fragment {
                     // Cart changed - reload context
                     loadCartContext();
                 });
+        }
+    }
+
+    /**
+     * Resets the conversation to start fresh
+     * 
+     * Clears all chat messages from the UI and conversation history,
+     * then reloads the cart context to start a new conversation.
+     */
+    private void resetConversation() {
+        // Clear UI messages
+        chatMessages.clear();
+        chatAdapter.notifyDataSetChanged();
+
+        // Clear conversation history
+        chatHistory.clear();
+
+        // Reload cart context (will add fresh system instruction)
+        loadCartContext();
+
+        // Optional: Show confirmation to user
+        if (getContext() != null) {
+            android.widget.Toast.makeText(getContext(), "New conversation started", android.widget.Toast.LENGTH_SHORT).show();
         }
     }
 }
