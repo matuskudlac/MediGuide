@@ -11,6 +11,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,11 +41,12 @@ import java.util.List;
 public class AiFragment extends Fragment {
 
     private static final String TAG = "AiFragment";
-    
+
+    private AiViewModel viewModel;  // ViewModel to persist data across lifecycle
     private RecyclerView chatRecyclerView;
     private ChatMessageAdapter chatAdapter;
-    private List<ChatMessage> chatMessages; // For UI display
-    private List<Content> chatHistory; // For conversation history
+    private List<ChatMessage> chatMessages; // Reference to ViewModel's list
+    private List<Content> chatHistory; // Reference to ViewModel's list
     private EditText chatInput;
     private Button sendButton;
     private GenerativeModelFutures generativeModel;
@@ -55,11 +57,17 @@ public class AiFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_ai, container, false);
 
+        // Initialize ViewModel (survives fragment recreation)
+        viewModel = new ViewModelProvider(this).get(AiViewModel.class);
+
+        // Get references to ViewModel's lists (persisted across lifecycle)
+        chatMessages = viewModel.getChatMessages();
+        chatHistory = viewModel.getChatHistory();
+
         chatRecyclerView = root.findViewById(R.id.chat_recyclerview);
         chatInput = root.findViewById(R.id.chat_input);
         sendButton = root.findViewById(R.id.send_button);
 
-        chatMessages = new ArrayList<>();
         chatAdapter = new ChatMessageAdapter(chatMessages);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
@@ -69,9 +77,6 @@ public class AiFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance(); // Initializes the connection to the Firestore database
 
-        // Initialize chat history (system instruction will be added after cart loads)
-        chatHistory = new ArrayList<>();
-
         sendButton.setOnClickListener(v -> {
             String messageText = chatInput.getText().toString().trim();
             if (!messageText.isEmpty()) {
@@ -79,7 +84,10 @@ public class AiFragment extends Fragment {
             }
         });
 
-        loadCartContext(); // Load the user's cart context
+        // Only load cart context if this is the first time (history is empty)
+        if (chatHistory.isEmpty()) {
+            loadCartContext(); // Load the user's cart context
+        }
         listenForCartUpdates(); // Listen for changes to the user's cart
 
         return root;
@@ -407,11 +415,19 @@ public class AiFragment extends Fragment {
         String fullInstruction = baseInstruction + cartContext;
 
         // Clear existing chat history and create new system instruction
-        chatHistory.clear();
-        Content systemInstruction = new Content.Builder()
-            .addText(fullInstruction)
-            .build();
-        chatHistory.add(systemInstruction);
+        if (chatHistory.isEmpty()) {
+            // First time - add system instruction
+            Content systemInstruction = new Content.Builder()
+                    .addText(fullInstruction)
+                    .build();
+            chatHistory.add(systemInstruction);
+        } else {
+            // Update existing system instruction (always at index 0)
+            Content systemInstruction = new Content.Builder()
+                    .addText(fullInstruction)
+                    .build();
+            chatHistory.set(0, systemInstruction);  // ✅ Replace only first item
+        }
     }
 
     private void listenForCartUpdates() {
