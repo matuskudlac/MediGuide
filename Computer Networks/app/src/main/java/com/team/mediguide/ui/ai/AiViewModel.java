@@ -14,10 +14,12 @@ public class AiViewModel extends ViewModel {
     
     private List<ChatMessage> chatMessages;
     private List<Content> chatHistory;
+    private List<com.team.mediguide.Product> allProducts;  // Persist product catalog
     
     public AiViewModel() {
         chatMessages = new ArrayList<>();
         chatHistory = new ArrayList<>();
+        allProducts = new ArrayList<>();
     }
     
     public List<ChatMessage> getChatMessages() {
@@ -26,6 +28,14 @@ public class AiViewModel extends ViewModel {
     
     public List<Content> getChatHistory() {
         return chatHistory;
+    }
+    
+    public List<com.team.mediguide.Product> getAllProducts() {
+        return allProducts;
+    }
+    
+    public void setAllProducts(List<com.team.mediguide.Product> products) {
+        this.allProducts = products;
     }
     
     public void clearConversation() {

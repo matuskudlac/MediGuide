@@ -31,7 +31,11 @@
         android:id="@+id/navigation_ai"
         android:name="com.team.mediguide.ui.ai.AiFragment"
         android:label="AI Assistant"
-        tools:layout="@layout/fragment_ai" />
+        tools:layout="@layout/fragment_ai">
+        <action
+            android:id="@+id/action_navigation_ai_to_productDetailFragment"
+            app:destination="@id/productDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"

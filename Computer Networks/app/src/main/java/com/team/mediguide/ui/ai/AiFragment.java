@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,7 +39,7 @@ import com.google.firebase.firestore.FirebaseFirestore; // To query the database
 import java.util.ArrayList;
 import java.util.List;
 
-public class AiFragment extends Fragment {
+public class AiFragment extends Fragment implements ChatMessageAdapter.OnProductClickListener {
 
     private static final String TAG = "AiFragment";
 
@@ -66,6 +67,7 @@ public class AiFragment extends Fragment {
         // Get references to ViewModel's lists (persisted across lifecycle)
         chatMessages = viewModel.getChatMessages();
         chatHistory = viewModel.getChatHistory();
+        allProducts = viewModel.getAllProducts();  // Get persisted product catalog
 
         chatRecyclerView = root.findViewById(R.id.chat_recyclerview);
         chatInput = root.findViewById(R.id.chat_input);
@@ -73,8 +75,28 @@ public class AiFragment extends Fragment {
         newChatText = root.findViewById(R.id.new_chat_text);
 
         chatAdapter = new ChatMessageAdapter(chatMessages);
+        chatAdapter.setProductClickListener(this);  // Set click listener for product links
+        
+        // If products are already loaded, pass them to adapter immediately
+        if (allProducts != null && !allProducts.isEmpty()) {
+            Log.d(TAG, "Passing " + allProducts.size() + " products to adapter");
+            chatAdapter.setAllProducts(allProducts);
+        } else {
+            Log.d(TAG, "No products loaded yet");
+        }
+        
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
+        
+        // Notify adapter of existing messages (important when returning to fragment)
+        if (!chatMessages.isEmpty()) {
+            Log.d(TAG, "Notifying adapter of " + chatMessages.size() + " existing messages");
+            chatAdapter.notifyDataSetChanged();
+            // Scroll to show the latest message
+            chatRecyclerView.scrollToPosition(chatMessages.size() - 1);
+        } else {
+            Log.d(TAG, "No existing messages");
+        }
 
         GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.MEDI_GUIDE_API_KEY);
         generativeModel = GenerativeModelFutures.from(gm);
@@ -90,10 +112,24 @@ public class AiFragment extends Fragment {
 
         newChatText.setOnClickListener(v -> resetConversation());
 
+        // Disable send button until products are loaded (prevents race condition)
+        sendButton.setEnabled(false);
+        sendButton.setText("Loading...");
+
         // Only load cart context if this is the first time (history is empty)
         if (chatHistory.isEmpty()) {
             loadCartContext(); // Load the user's cart context
             loadProductCatalog(); // Load all products for recommendations
+        } else {
+            // Returning to fragment: Products are loaded in ViewModel, but context string is lost
+            // We need to rebuild the context string for the AI
+            if (allProducts != null && !allProducts.isEmpty()) {
+                buildProductCatalogContext();
+            }
+            
+            // Enable send button
+            sendButton.setEnabled(true);
+            sendButton.setText("Send");
         }
         listenForCartUpdates(); // Listen for changes to the user's cart
 
@@ -489,6 +525,25 @@ public class AiFragment extends Fragment {
         // Store the formatted catalog
         productCatalogContext = catalog.toString();
 
+        // Save products to ViewModel for persistence
+        if (viewModel != null) {
+            viewModel.setAllProducts(allProducts);
+        }
+
+        // Pass products to adapter for clickable links
+        if (chatAdapter != null) {
+            chatAdapter.setAllProducts(allProducts);
+            // Notify adapter to re-render messages with clickable links
+            chatAdapter.notifyDataSetChanged();
+        }
+
+        // Enable send button now that products are loaded
+        if (sendButton != null) {
+            sendButton.setEnabled(true);
+            sendButton.setText("Send");
+            Log.d(TAG, "Products loaded, send button enabled");
+        }
+
         // Update AI's system instruction with catalog
         updateSystemInstruction();
     }
@@ -510,7 +565,9 @@ public class AiFragment extends Fragment {
             "Keep your answers concise and clear. " +
             "Try to avoid using ** when printing messages. " +
             "You can recommend products from our catalog based on user symptoms or needs. " +
-            "IMPORTANT: MediGuide is the app name, NOT a product brand. Always use the actual brand name shown in the product catalog.";
+            "IMPORTANT: MediGuide is the app name, NOT a product brand. Always use the actual brand name shown in the product catalog. " +
+            "When recommending products, simply mention the product name - do NOT generate URLs or links. " +
+            "CRITICAL: You MUST use the EXACT product name as listed in the catalog (character for character), otherwise the link will not work. Do not shorten or alter product names.";
 
         // Combine base instruction with cart context and product catalog
         // This gives the AI knowledge of what's in the user's cart AND all available products
@@ -569,6 +626,42 @@ public class AiFragment extends Fragment {
         // Optional: Show confirmation to user
         if (getContext() != null) {
             android.widget.Toast.makeText(getContext(), "New conversation started", android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Called when user taps on a product name in AI chat
+     * Switches to Home tab (preserving AI state), then navigates to Product Detail
+     */
+    @Override
+    public void onProductClick(String productId) {
+        if (getActivity() != null) {
+            try {
+                // Find BottomNavigationView
+                com.google.android.material.bottomnavigation.BottomNavigationView navView = 
+                    getActivity().findViewById(R.id.nav_view);
+                
+                if (navView != null) {
+                    // Step 1: Switch to Home tab programmatically
+                    // This triggers NavigationUI to save AI state and restore Home state
+                    navView.setSelectedItemId(R.id.navigation_home);
+                    
+                    // Step 2: Navigate to Product Detail after a short delay to allow tab switch
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        try {
+                            android.os.Bundle bundle = new android.os.Bundle();
+                            bundle.putString("productId", productId);
+                            // Navigate from Home to Product Detail
+                            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+                                .navigate(R.id.action_navigation_home_to_productDetailFragment, bundle);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error navigating to product detail", e);
+                        }
+                    }, 100);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error switching tabs", e);
+            }
         }
     }
 }
