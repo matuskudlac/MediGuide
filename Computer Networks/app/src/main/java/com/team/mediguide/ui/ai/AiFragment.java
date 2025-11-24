@@ -54,6 +54,8 @@ public class AiFragment extends Fragment {
     private FirebaseFirestore db;              // Firestore database instance
     private List<Product> cartProducts;        // Products currently in user's cart
     private String cartContext = "";           // Formatted cart info for AI context
+    private List<Product> allProducts;         // Complete product catalog for recommendations
+    private String productCatalogContext = ""; // Formatted product catalog for AI context
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_ai, container, false);
@@ -91,6 +93,7 @@ public class AiFragment extends Fragment {
         // Only load cart context if this is the first time (history is empty)
         if (chatHistory.isEmpty()) {
             loadCartContext(); // Load the user's cart context
+            loadProductCatalog(); // Load all products for recommendations
         }
         listenForCartUpdates(); // Listen for changes to the user's cart
 
@@ -397,6 +400,99 @@ public class AiFragment extends Fragment {
         return null; // Not found (shouldn't happen in normal operation)
     }
 
+    // ==================== PRODUCT CATALOG METHODS ====================
+    // These methods load all products for AI recommendations
+
+    /**
+     * Loads the complete product catalog from Firestore
+     * 
+     * Fetches all active products so the AI can recommend products
+     * based on user symptoms, needs, or questions.
+     * 
+     * This is called once on startup and provides the AI with knowledge
+     * of all available products for intelligent recommendations.
+     */
+    private void loadProductCatalog() {
+        // Query Firestore for all active products
+        db.collection("Products")
+            .whereEqualTo("is_active", true)  // Only show active products
+            .get()
+            .addOnSuccessListener(querySnapshot -> {
+                // Convert Firestore documents to Product objects
+                allProducts = new ArrayList<>();
+                for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                    Product product = doc.toObject(Product.class);
+                    if (product != null) {
+                        product.id = doc.getId();
+                        allProducts.add(product);
+                    }
+                }
+
+                // Build formatted catalog context for AI
+                buildProductCatalogContext();
+            })
+            .addOnFailureListener(e -> {
+                // Handle error gracefully
+                productCatalogContext = "";
+                Log.e(TAG, "Error loading product catalog", e);
+            });
+    }
+
+    /**
+     * Builds a formatted string containing the product catalog for AI
+     * 
+     * Creates a lightweight summary of all products including:
+     * - Product name
+     * - Brief description
+     * - Keywords (for symptom matching)
+     * 
+     * This allows the AI to recommend products based on user needs
+     * without overwhelming the context window.
+     * 
+     * Example output:
+     * Available Products:
+     * - Aspirin 500mg: Pain relief and fever reducer (headache, pain, fever)
+     * - Vitamin C: Immune system support (cold, immunity, wellness)
+     */
+    private void buildProductCatalogContext() {
+        if (allProducts == null || allProducts.isEmpty()) {
+            productCatalogContext = "";
+            return;
+        }
+
+        StringBuilder catalog = new StringBuilder("\n\nAvailable Products in Our Catalog:\n");
+
+        for (Product product : allProducts) {
+            // Add product name with brand
+            catalog.append(String.format(java.util.Locale.getDefault(), "- %s", product.name));
+            
+            // Add brand if available (important to distinguish from app name)
+            if (product.brand != null && !product.brand.isEmpty()) {
+                catalog.append(String.format(java.util.Locale.getDefault(), " (Brand: %s)", product.brand));
+            }
+
+            // Add description if available
+            if (product.description != null && !product.description.isEmpty()) {
+                catalog.append(": ").append(product.description);
+            }
+
+            // Add keywords if available (helps AI match symptoms to products)
+            if (product.keywords != null && !product.keywords.isEmpty()) {
+                catalog.append(" [");
+                catalog.append(String.join(", ", product.keywords));
+                catalog.append("]");
+            }
+
+            catalog.append("\n");
+        }
+
+        // Store the formatted catalog
+        productCatalogContext = catalog.toString();
+
+        // Update AI's system instruction with catalog
+        updateSystemInstruction();
+    }
+
     /**
      * Updates the AI's system instruction with cart context
      * 
@@ -411,12 +507,14 @@ public class AiFragment extends Fragment {
         // Base instruction defining AI's role and behavior
         String baseInstruction = "You are MediGuide's friendly and helpful AI assistant. " +
             "Your goal is to help users with questions about their health and the products we sell. " +
-            "Keep your answers concise and clear." +
-            "Try to avoid using ** when printing messages";
+            "Keep your answers concise and clear. " +
+            "Try to avoid using ** when printing messages. " +
+            "You can recommend products from our catalog based on user symptoms or needs. " +
+            "IMPORTANT: MediGuide is the app name, NOT a product brand. Always use the actual brand name shown in the product catalog.";
 
-        // Combine base instruction with cart context
-        // This gives the AI knowledge of what's in the user's cart
-        String fullInstruction = baseInstruction + cartContext;
+        // Combine base instruction with cart context and product catalog
+        // This gives the AI knowledge of what's in the user's cart AND all available products
+        String fullInstruction = baseInstruction + cartContext + productCatalogContext;
 
         // Clear existing chat history and create new system instruction
         if (chatHistory.isEmpty()) {
