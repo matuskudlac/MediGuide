@@ -107,7 +107,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             decrementButton = itemView.findViewById(R.id.cart_decrement_button);
             incrementButton = itemView.findViewById(R.id.cart_increment_button);
             removeButton = itemView.findViewById(R.id.cart_remove_button);
-            //nonsense part 2
+            //nonsense part 3
         }
     }
 }
