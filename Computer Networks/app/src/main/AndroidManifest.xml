@@ -26,6 +26,12 @@
             android:exported="false"
             android:parentActivityName=".DashboardActivity" />
 
+        <!-- OrderHistoryActivity -->
+        <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
         <!-- MainActivity (launcher) -->
         <activity
             android:name=".MainActivity"
