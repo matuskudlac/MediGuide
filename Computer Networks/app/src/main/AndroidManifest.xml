@@ -32,6 +32,18 @@
             android:exported="false"
             android:parentActivityName=".DashboardActivity" />
 
+        <!-- ProductManagementActivity -->
+        <activity
+            android:name=".ProductManagementActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
+        <!-- AddEditProductActivity -->
+        <activity
+            android:name=".AddEditProductActivity"
+            android:exported="false"
+            android:parentActivityName=".ProductManagementActivity" />
+
         <!-- MainActivity (launcher) -->
         <activity
             android:name=".MainActivity"
