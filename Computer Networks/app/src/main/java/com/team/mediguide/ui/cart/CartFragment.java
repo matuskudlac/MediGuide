@@ -1,5 +1,6 @@
 package com.team.mediguide.ui.cart;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,9 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.team.mediguide.CartAdapter;
 import com.team.mediguide.CartItem;
+import com.team.mediguide.CheckoutActivity;
+import com.team.mediguide.OrderItem;
+import com.team.mediguide.Product;
 import com.team.mediguide.R;
 
 import java.util.ArrayList;
@@ -45,8 +49,13 @@ public class CartFragment extends Fragment {
 
         Button checkoutButton = root.findViewById(R.id.checkoutButton);
         checkoutButton.setOnClickListener(v -> {
-            // TODO: Implement checkout logic
-            Toast.makeText(getContext(), "Checkout not yet implemented.", Toast.LENGTH_SHORT).show();
+            if (cartItems.isEmpty()) {
+                Toast.makeText(getContext(), "Your cart is empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Convert cart items to order items and launch checkout
+            prepareCheckout();
         });
 
         return root;
@@ -86,6 +95,41 @@ public class CartFragment extends Fragment {
                             }
                         }
                         cartAdapter.notifyDataSetChanged();
+                    });
+        }
+    }
+
+    private void prepareCheckout() {
+        List<OrderItem> orderItems = new ArrayList<>();
+        int[] pendingRequests = {cartItems.size()}; // Counter for async requests
+        
+        for (CartItem cartItem : cartItems) {
+            db.collection("Products").document(cartItem.productId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            Product product = documentSnapshot.toObject(Product.class);
+                            OrderItem orderItem = new OrderItem(
+                                    cartItem.productId,
+                                    product.name,
+                                    product.imageUrl,
+                                    product.price,
+                                    cartItem.quantity
+                            );
+                            orderItems.add(orderItem);
+                        }
+                        
+                        // Check if all requests completed
+                        pendingRequests[0]--;
+                        if (pendingRequests[0] == 0) {
+                            // All product details fetched, launch checkout
+                            Intent intent = new Intent(getActivity(), CheckoutActivity.class);
+                            intent.putExtra("ORDER_ITEMS", (ArrayList<OrderItem>) orderItems);
+                            startActivity(intent);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed to load product details", 
+                                Toast.LENGTH_SHORT).show();
                     });
         }
     }

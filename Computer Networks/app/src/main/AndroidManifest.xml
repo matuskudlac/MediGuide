@@ -14,6 +14,18 @@
             android:name=".DashboardActivity"
             android:exported="true" />
 
+        <!-- CheckoutActivity -->
+        <activity
+            android:name=".CheckoutActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
+        <!-- CheckoutSuccessActivity -->
+        <activity
+            android:name=".CheckoutSuccessActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
         <!-- MainActivity (launcher) -->
         <activity
             android:name=".MainActivity"
