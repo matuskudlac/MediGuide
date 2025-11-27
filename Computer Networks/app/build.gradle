@@ -14,8 +14,9 @@ android {
         versionCode 1
         versionName "1.0"
 
-        // Read the API key from gradle.properties and make it available in the BuildConfig class
+        // Read the API keys from gradle.properties and make them available in the BuildConfig class
         buildConfigField "String", "MEDI_GUIDE_API_KEY", "\"${project.properties['MEDI_GUIDE_API_KEY']}\""
+        buildConfigField "String", "STRIPE_PUBLISHABLE_KEY", "\"${project.properties['STRIPE_PUBLISHABLE_KEY']}\""
     }
 
     buildTypes {
@@ -51,4 +52,5 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:2.7.7")
     implementation("androidx.navigation:navigation-ui:2.7.7")
     implementation("com.google.ai.client.generativeai:generativeai:0.8.0")
+    implementation("com.stripe:stripe-android:20.37.0")
 }
