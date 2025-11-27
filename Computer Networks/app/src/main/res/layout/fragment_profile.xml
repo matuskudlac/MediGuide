@@ -16,6 +16,18 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
+            android:id="@+id/manageProductsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Manage Products"
+            android:backgroundTint="@color/royal_blue"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:visibility="gone" />
+
+        <Button
             android:id="@+id/viewOrdersButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
