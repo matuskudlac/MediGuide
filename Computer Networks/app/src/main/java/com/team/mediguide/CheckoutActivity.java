@@ -2,6 +2,8 @@ package com.team.mediguide;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +27,9 @@ public class CheckoutActivity extends AppCompatActivity {
     private List<OrderItem> orderItems;
     private TextView subtotalText, taxText, totalText;
     private Button payButton;
+    
+    private com.google.android.material.textfield.TextInputEditText streetInput, cityInput, zipInput, countryInput;
+    private AutoCompleteTextView stateInput;
     
     private double subtotal = 0.0;
     private double tax = 0.0;
@@ -55,6 +60,16 @@ public class CheckoutActivity extends AppCompatActivity {
         taxText = findViewById(R.id.checkout_tax);
         totalText = findViewById(R.id.checkout_total);
         payButton = findViewById(R.id.pay_button);
+        
+        // Initialize shipping address inputs
+        streetInput = findViewById(R.id.input_street);
+        cityInput = findViewById(R.id.input_city);
+        stateInput = findViewById(R.id.input_state);
+        zipInput = findViewById(R.id.input_zip);
+        countryInput = findViewById(R.id.input_country);
+        
+        // Setup state dropdown
+        setupStateDropdown();
 
         // Get order items from intent
         //noinspection unchecked
@@ -74,6 +89,19 @@ public class CheckoutActivity extends AppCompatActivity {
         // Setup pay button
         payButton.setOnClickListener(v -> presentPaymentSheet());
     }
+    
+    private void setupStateDropdown() {
+        String[] states = new String[]{
+            "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+            "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+            "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+            "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+            "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+        };
+        
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, states);
+        stateInput.setAdapter(adapter);
+    }
 
     private void calculateTotals() {
         subtotal = 0.0;
@@ -90,12 +118,53 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void presentPaymentSheet() {
+        // Validate shipping address before proceeding
+        if (!validateShippingAddress()) {
+            return;
+        }
+        
         // For a class demo, we'll use a simplified approach
         // In production, you'd call your backend to create a PaymentIntent
         // and use: paymentSheet.presentWithPaymentIntent(clientSecret, configuration);
         
         // For demo purposes, show a dialog to simulate payment
         showMockPaymentDialog();
+    }
+    
+    private boolean validateShippingAddress() {
+        String street = streetInput.getText().toString().trim();
+        String city = cityInput.getText().toString().trim();
+        String state = stateInput.getText().toString().trim();
+        String zip = zipInput.getText().toString().trim();
+        String country = countryInput.getText().toString().trim();
+        
+        if (street.isEmpty()) {
+            streetInput.setError("Street address is required");
+            streetInput.requestFocus();
+            return false;
+        }
+        if (city.isEmpty()) {
+            cityInput.setError("City is required");
+            cityInput.requestFocus();
+            return false;
+        }
+        if (state.isEmpty()) {
+            stateInput.setError("State is required");
+            stateInput.requestFocus();
+            return false;
+        }
+        if (zip.isEmpty()) {
+            zipInput.setError("Zip code is required");
+            zipInput.requestFocus();
+            return false;
+        }
+        if (country.isEmpty()) {
+            countryInput.setError("Country is required");
+            countryInput.requestFocus();
+            return false;
+        }
+        
+        return true;
     }
 
     private void showMockPaymentDialog() {
@@ -139,6 +208,15 @@ public class CheckoutActivity extends AppCompatActivity {
         }
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         
+        // Create shipping address from inputs
+        ShippingAddress shippingAddress = new ShippingAddress(
+                streetInput.getText().toString().trim(),
+                cityInput.getText().toString().trim(),
+                stateInput.getText().toString().trim(),
+                zipInput.getText().toString().trim(),
+                countryInput.getText().toString().trim()
+        );
+        
         // Create order object
         Order order = new Order(
                 orderId,
@@ -148,7 +226,8 @@ public class CheckoutActivity extends AppCompatActivity {
                 tax,
                 total,
                 "completed",
-                paymentMethod
+                paymentMethod,
+                shippingAddress
         );
 
         // Save order to Firestore
