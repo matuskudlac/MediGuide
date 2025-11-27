@@ -44,6 +44,12 @@
             android:exported="false"
             android:parentActivityName=".ProductManagementActivity" />
 
+        <!-- SignUpActivity -->
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
         <!-- MainActivity (launcher) -->
         <activity
             android:name=".MainActivity"
