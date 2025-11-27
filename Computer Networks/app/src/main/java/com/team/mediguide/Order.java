@@ -32,6 +32,9 @@ public class Order {
     @PropertyName("Payment_Method")
     public String paymentMethod;
     
+    @PropertyName("Shipping_Address")
+    public ShippingAddress shippingAddress;
+    
     @ServerTimestamp
     @PropertyName("Order_Date")
     public Date orderDate;
@@ -39,7 +42,7 @@ public class Order {
     // Required for Firestore
     public Order() {}
     
-    public Order(String orderId, String userId, List<OrderItem> items, double subtotal, double tax, double total, String paymentStatus, String paymentMethod) {
+    public Order(String orderId, String userId, List<OrderItem> items, double subtotal, double tax, double total, String paymentStatus, String paymentMethod, ShippingAddress shippingAddress) {
         this.orderId = orderId;
         this.userId = userId;
         this.items = items;
@@ -48,5 +51,6 @@ public class Order {
         this.total = total;
         this.paymentStatus = paymentStatus;
         this.paymentMethod = paymentMethod;
+        this.shippingAddress = shippingAddress;
     }
 }

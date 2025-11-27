@@ -10,7 +10,7 @@
         android:id="@+id/checkout_product_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         android:background="@android:color/white"
         android:padding="4dp"
         android:contentDescription="Product image" />
