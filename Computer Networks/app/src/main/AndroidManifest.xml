@@ -14,6 +14,42 @@
             android:name=".DashboardActivity"
             android:exported="true" />
 
+        <!-- CheckoutActivity -->
+        <activity
+            android:name=".CheckoutActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
+        <!-- CheckoutSuccessActivity -->
+        <activity
+            android:name=".CheckoutSuccessActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
+        <!-- OrderHistoryActivity -->
+        <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
+        <!-- ProductManagementActivity -->
+        <activity
+            android:name=".ProductManagementActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity" />
+
+        <!-- AddEditProductActivity -->
+        <activity
+            android:name=".AddEditProductActivity"
+            android:exported="false"
+            android:parentActivityName=".ProductManagementActivity" />
+
+        <!-- SignUpActivity -->
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
         <!-- MainActivity (launcher) -->
         <activity
             android:name=".MainActivity"

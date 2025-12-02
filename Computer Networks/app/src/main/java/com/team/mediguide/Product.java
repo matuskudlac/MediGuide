@@ -53,4 +53,41 @@ public class Product {
 
     // Required empty public constructor for Firestore
     public Product() {}
+    
+    // Getters and Setters (only for fields not used by Firestore serialization)
+    @Exclude
+    public String getId() {
+        return id;
+    }
+    
+    @Exclude
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+    // Convenience methods that map to the actual field names
+    @Exclude
+    public String getName() {
+        return name;
+    }
+    
+    @Exclude
+    public String getDescription() {
+        return description;
+    }
+    
+    @Exclude
+    public double getPrice() {
+        return price;
+    }
+    
+    @Exclude
+    public String getImage() {
+        return imageUrl;
+    }
+    
+    @Exclude
+    public String getCategory() {
+        return categoryId;
+    }
 }

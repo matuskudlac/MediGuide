@@ -76,6 +76,13 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
         });
+
+        // Handle create account button click
+        Button createAccountButton = findViewById(R.id.createAccountButton);
+        createAccountButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override

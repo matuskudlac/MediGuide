@@ -2,16 +2,63 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
-    <Button
-        android:id="@+id/signOutButton"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign Out"
+        android:orientation="vertical"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/manageProductsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Manage Products"
+            android:backgroundTint="@color/royal_blue"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/viewOrdersButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Order History"
+            android:backgroundTint="@color/royal_blue"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp" />
+
+        <Button
+            android:id="@+id/changePasswordButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Password"
+            android:backgroundTint="@color/royal_blue"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp" />
+
+        <Button
+            android:id="@+id/signOutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign Out"
+            android:backgroundTint="@android:color/darker_gray"
+            android:textColor="@android:color/white"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
