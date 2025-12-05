@@ -92,6 +92,14 @@ public class SearchFragment extends Fragment {
         return root;
     }
     
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh product data whenever the fragment becomes visible
+        // This ensures stock quantities are up-to-date after orders are placed
+        fetchProducts();
+    }
+    
     private void updateCloseButtonVisibility(String query) {
         // Find the close button view and hide/show it based on query text
         boolean shouldShow = query != null && !query.isEmpty();
