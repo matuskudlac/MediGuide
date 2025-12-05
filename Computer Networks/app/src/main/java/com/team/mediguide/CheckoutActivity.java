@@ -173,17 +173,32 @@ public class CheckoutActivity extends AppCompatActivity {
         layout.setOrientation(android.widget.LinearLayout.VERTICAL);
         layout.setPadding(50, 20, 50, 10);
 
-        final android.widget.EditText cardInput = new android.widget.EditText(this);
-        cardInput.setHint("Card Number (e.g. 4242 4242 4242 4242)");
+        // Use TextInputLayout for proper Material Design styling with outline
+        com.google.android.material.textfield.TextInputLayout inputLayout = 
+                new com.google.android.material.textfield.TextInputLayout(this);
+        inputLayout.setHint("Card Number (e.g. 4242 4242 4242 4242)");
+        inputLayout.setBoxBackgroundMode(com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE);
+        
+        // Set layout parameters for proper width
+        android.widget.LinearLayout.LayoutParams layoutParams = new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        inputLayout.setLayoutParams(layoutParams);
+        
+        final com.google.android.material.textfield.TextInputEditText cardInput = 
+                new com.google.android.material.textfield.TextInputEditText(inputLayout.getContext());
         cardInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        layout.addView(cardInput);
+        
+        inputLayout.addView(cardInput);
+        layout.addView(inputLayout);
 
-        // Use a specific AppCompat theme to ensure buttons are visible (Dark text on Light background)
-        new androidx.appcompat.app.AlertDialog.Builder(this, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
+        // Create and show the dialog with Material theme
+        androidx.appcompat.app.AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Pay with Card")
                 .setMessage("Total: " + String.format(java.util.Locale.US, "$%.2f", total) + "\n\nEnter test card details below:")
                 .setView(layout)
-                .setPositiveButton("Pay Now", (dialog, which) -> {
+                .setPositiveButton("Pay Now", (dialogInterface, which) -> {
                     String cardNumber = cardInput.getText().toString().replaceAll("\\s+", ""); // Remove spaces
                     
                     // Simulate decline for specific test card ending in 0002
@@ -194,11 +209,27 @@ public class CheckoutActivity extends AppCompatActivity {
                         processSuccessfulPayment("card");
                     }
                 })
-                .setNegativeButton("Google Pay", (dialog, which) -> {
+                .setNegativeButton("Google Pay", (dialogInterface, which) -> {
                     processSuccessfulPayment("google_pay");
                 })
                 .setNeutralButton("Cancel", null)
-                .show();
+                .create();
+        
+        dialog.show();
+        
+        // Ensure buttons are visible by setting their text color
+        if (dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE) != null) {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setTextColor(
+                    getResources().getColor(R.color.royal_blue, null));
+        }
+        if (dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE) != null) {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(
+                    getResources().getColor(R.color.royal_blue, null));
+        }
+        if (dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL) != null) {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL).setTextColor(
+                    getResources().getColor(android.R.color.darker_gray, null));
+        }
     }
 
     private void processSuccessfulPayment(String paymentMethod) {
@@ -234,6 +265,9 @@ public class CheckoutActivity extends AppCompatActivity {
         db.collection("Orders").document(orderId)
                 .set(order)
                 .addOnSuccessListener(aVoid -> {
+                    // Update product stock quantities
+                    updateProductStock();
+                    
                     // Clear the cart
                     clearCart(userId);
                     
@@ -247,6 +281,21 @@ public class CheckoutActivity extends AppCompatActivity {
                     Toast.makeText(this, "Failed to save order: " + e.getMessage(), 
                             Toast.LENGTH_SHORT).show();
                 });
+    }
+    
+    private void updateProductStock() {
+        // Update stock for each product in the order
+        for (OrderItem item : orderItems) {
+            // Use FieldValue.increment to safely decrement stock
+            // This prevents race conditions if multiple orders are placed simultaneously
+            db.collection("Products").document(item.productId)
+                    .update("Stock", com.google.firebase.firestore.FieldValue.increment(-item.quantity))
+                    .addOnFailureListener(e -> {
+                        // Log error but don't block the order completion
+                        android.util.Log.e("CheckoutActivity", 
+                                "Failed to update stock for product " + item.productId + ": " + e.getMessage());
+                    });
+        }
     }
 
     private void clearCart(String userId) {

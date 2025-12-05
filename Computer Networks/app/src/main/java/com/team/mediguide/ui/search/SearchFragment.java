@@ -61,7 +61,16 @@ public class SearchFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 filterProducts(newText);
+                // Show/hide close button based on whether there's text
+                updateCloseButtonVisibility(newText);
                 return true;
+            }
+        });
+        
+        // Add focus change listener to update close button visibility
+        searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus && searchView.getQuery().toString().isEmpty()) {
+                updateCloseButtonVisibility("");
             }
         });
 
@@ -70,11 +79,81 @@ public class SearchFragment extends Fragment {
         searchView.setFocusable(true);
         searchView.requestFocusFromTouch();
         searchView.clearFocus(); // Clear focus so keyboard doesn't auto-show, but bar is still clickable
+        
+        // Initially hide the close button after view is fully created
+        // Use multiple delayed posts to ensure it catches the button
+        searchView.post(() -> updateCloseButtonVisibility(""));
+        searchView.postDelayed(() -> updateCloseButtonVisibility(""), 100);
+        searchView.postDelayed(() -> updateCloseButtonVisibility(""), 300);
 
         // Fetch all products
         fetchProducts();
 
         return root;
+    }
+    
+    private void updateCloseButtonVisibility(String query) {
+        // Find the close button view and hide/show it based on query text
+        boolean shouldShow = query != null && !query.isEmpty();
+        
+        try {
+            // Method 1: Try standard Android ID
+            int closeButtonId = searchView.getContext().getResources()
+                    .getIdentifier("search_close_btn", "id", "android");
+            
+            if (closeButtonId != 0) {
+                View closeButton = searchView.findViewById(closeButtonId);
+                if (closeButton != null) {
+                    closeButton.setVisibility(shouldShow ? View.VISIBLE : View.GONE);
+                    return;
+                }
+            }
+            
+            // Method 2: Try androidx package
+            closeButtonId = searchView.getContext().getResources()
+                    .getIdentifier("search_close_btn", "id", searchView.getContext().getPackageName());
+            
+            if (closeButtonId != 0) {
+                View closeButton = searchView.findViewById(closeButtonId);
+                if (closeButton != null) {
+                    closeButton.setVisibility(shouldShow ? View.VISIBLE : View.GONE);
+                    return;
+                }
+            }
+            
+            // Method 3: Search through view hierarchy
+            View closeButton = findViewByClassName(searchView, "ImageView");
+            if (closeButton != null && closeButton.getContentDescription() != null && 
+                closeButton.getContentDescription().toString().toLowerCase().contains("clear")) {
+                closeButton.setVisibility(shouldShow ? View.VISIBLE : View.GONE);
+            }
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating close button visibility", e);
+        }
+    }
+    
+    private View findViewByClassName(ViewGroup parent, String className) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            if (child.getClass().getSimpleName().equals(className)) {
+                // Check if this ImageView is likely the close button
+                // Close buttons typically have a content description
+                if (child.getContentDescription() != null) {
+                    String desc = child.getContentDescription().toString().toLowerCase();
+                    if (desc.contains("clear") || desc.contains("close")) {
+                        return child;
+                    }
+                }
+            }
+            if (child instanceof ViewGroup) {
+                View result = findViewByClassName((ViewGroup) child, className);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
     }
 
     private void fetchProducts() {
