@@ -73,6 +73,14 @@ public class SearchFragment extends Fragment {
                 updateCloseButtonVisibility("");
             }
         });
+        
+        // Prevent SearchView from collapsing when close button is clicked
+        searchView.setOnCloseListener(() -> {
+            // Return false to allow the default close behavior (clearing text)
+            // but keep the SearchView expanded
+            searchView.setIconified(false);
+            return false;
+        });
 
         // Ensure SearchView is always expanded and ready for input
         searchView.setIconified(false);
