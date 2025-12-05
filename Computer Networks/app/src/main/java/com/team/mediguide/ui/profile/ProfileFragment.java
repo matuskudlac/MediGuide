@@ -88,10 +88,10 @@ public class ProfileFragment extends Fragment {
         layout.addView(confirmPasswordInput);
 
         // Create dialog
-        new AlertDialog.Builder(getActivity(), androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
                 .setTitle("Change Password")
                 .setView(layout)
-                .setPositiveButton("Change", (dialog, which) -> {
+                .setPositiveButton("Change", (dialogInterface, which) -> {
                     String currentPassword = currentPasswordInput.getText().toString().trim();
                     String newPassword = newPasswordInput.getText().toString().trim();
                     String confirmPassword = confirmPasswordInput.getText().toString().trim();
@@ -100,6 +100,16 @@ public class ProfileFragment extends Fragment {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+        
+        // Set button colors to royal blue to make them visible
+        if (dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                    getResources().getColor(R.color.royal_blue, null));
+        }
+        if (dialog.getButton(AlertDialog.BUTTON_NEGATIVE) != null) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(
+                    getResources().getColor(R.color.royal_blue, null));
+        }
     }
 
     private void changePassword(String currentPassword, String newPassword, String confirmPassword) {
