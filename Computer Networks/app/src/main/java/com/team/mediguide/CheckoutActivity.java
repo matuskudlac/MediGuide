@@ -290,10 +290,20 @@ public class CheckoutActivity extends AppCompatActivity {
             // This prevents race conditions if multiple orders are placed simultaneously
             db.collection("Products").document(item.productId)
                     .update("Stock", com.google.firebase.firestore.FieldValue.increment(-item.quantity))
+                    .addOnSuccessListener(aVoid -> {
+                        // Log successful stock update
+                        android.util.Log.d("CheckoutActivity", 
+                                "Successfully updated stock for product " + item.productId + 
+                                " (decreased by " + item.quantity + ")");
+                    })
                     .addOnFailureListener(e -> {
                         // Log error but don't block the order completion
                         android.util.Log.e("CheckoutActivity", 
                                 "Failed to update stock for product " + item.productId + ": " + e.getMessage());
+                        // Also show a toast to make the error visible
+                        Toast.makeText(CheckoutActivity.this, 
+                                "Warning: Stock not updated for " + item.productName, 
+                                Toast.LENGTH_SHORT).show();
                     });
         }
     }

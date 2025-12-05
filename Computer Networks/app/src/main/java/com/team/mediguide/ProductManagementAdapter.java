@@ -90,12 +90,24 @@ public class ProductManagementAdapter extends RecyclerView.Adapter<ProductManage
 
             // Delete button
             deleteButton.setOnClickListener(v -> {
-                new androidx.appcompat.app.AlertDialog.Builder(activity, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
+                androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(activity, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
                         .setTitle("Delete Product")
                         .setMessage("Are you sure you want to delete \"" + product.getName() + "\"?")
-                        .setPositiveButton("Delete", (dialog, which) -> deleteProduct(product))
+                        .setPositiveButton("Delete", (dialogInterface, which) -> deleteProduct(product))
                         .setNegativeButton("Cancel", null)
-                        .show();
+                        .create();
+                
+                dialog.show();
+                
+                // Set button colors to match the app theme
+                if (dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                            activity.getResources().getColor(R.color.royal_blue, null));
+                }
+                if (dialog.getButton(AlertDialog.BUTTON_NEGATIVE) != null) {
+                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(
+                            activity.getResources().getColor(R.color.royal_blue, null));
+                }
             });
         }
 

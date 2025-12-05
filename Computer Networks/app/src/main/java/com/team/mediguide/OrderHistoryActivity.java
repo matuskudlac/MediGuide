@@ -62,10 +62,22 @@ public class OrderHistoryActivity extends AppCompatActivity {
         }
         
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        
+        // Check if user is admin
+        boolean isAdmin = userEmail != null && userEmail.equals("admin@mediguide.com");
 
-        db.collection("Orders")
-                .whereEqualTo("User_ID", userId)
-                .get()
+        // Build query based on admin status
+        Query query;
+        if (isAdmin) {
+            // Admin sees all orders from all users
+            query = db.collection("Orders");
+        } else {
+            // Regular users see only their own orders
+            query = db.collection("Orders").whereEqualTo("User_ID", userId);
+        }
+        
+        query.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     orders.clear();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
